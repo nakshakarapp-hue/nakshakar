@@ -49,3 +49,6 @@ jobs:
           path: _site
       - id: deployment
         uses: actions/deploy-pages@v4
+        with:
+          # The site carries the installers, so publishing can take longer than the default 10 minutes.
+          timeout: 1800000

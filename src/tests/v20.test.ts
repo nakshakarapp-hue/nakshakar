@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { panBy, pinAt, toScreen, toWorld, type View } from '../editor2d/renderer';
-import { isNewer, parseRelease, SITE_URL } from '../app/update';
+import { isNewer, parseRelease, RELEASES_URL } from '../app/update';
 
 describe('a plan turned with two fingers', () => {
   const view: View = { cx: 5000, cy: 3000, zoom: 0.08, w: 800, h: 600, rot: 0.6 };
@@ -64,7 +64,7 @@ describe('the new version notice', () => {
       version: '2.1.0',
       date: '2026-12-01T10:00:00Z',
       notes: ['One', 2, 'Three'],
-      android: { url: `${SITE_URL}downloads/v2.1.0/Nakshakar.apk`, size: 4_000_000 },
+      android: { url: `${RELEASES_URL}v2.1.0/Nakshakar.apk`, size: 4_000_000 },
       windows: { url: 'https://example.com/evil.exe', size: 1 },
     });
     expect(r?.date).toBe('2026-12-01');

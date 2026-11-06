@@ -10,6 +10,8 @@ export const APP_VERSION: string = __APP_VERSION__;
  */
 export const SITE_URL = 'https://nakshakarapp-hue.github.io/nakshakar/';
 const UPDATE_URL = `${SITE_URL}version.json`;
+/** New versions are downloaded from the files attached to each release. */
+export const RELEASES_URL = 'https://github.com/nakshakarapp-hue/nakshakar/releases/download/';
 
 export interface Release {
   version: string;
@@ -62,7 +64,7 @@ export function parseRelease(data: unknown): Release | null {
   if (!r || typeof r.version !== 'string' || !/^\d+(\.\d+){0,3}$/.test(r.version)) return null;
   const link = (x: unknown) => {
     const l = x as { url?: unknown; size?: unknown } | undefined;
-    return l && typeof l.url === 'string' && l.url.startsWith(SITE_URL)
+    return l && typeof l.url === 'string' && (l.url.startsWith(RELEASES_URL) || l.url.startsWith(SITE_URL))
       ? { url: l.url, size: typeof l.size === 'number' ? l.size : 0 }
       : undefined;
   };

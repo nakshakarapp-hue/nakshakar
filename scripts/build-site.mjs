@@ -1,12 +1,10 @@
-// Builds the public website into _site: the landing page, the app at /app/, and every recent installer
-// at /downloads/, so nothing a visitor clicks ever leaves the site.
-import { cpSync, createWriteStream, existsSync, mkdirSync, rmSync, statSync, writeFileSync } from 'node:fs';
-import { Readable } from 'node:stream';
-import { pipeline } from 'node:stream/promises';
+// Builds the public website into _site: the landing page, the app at /app/, and a list of recent
+// versions whose downloads are the files attached to each release of the public repository. The
+// installers are not copied into the site: Pages could not publish that much within its time limit.
+import { cpSync, existsSync, mkdirSync, rmSync, writeFileSync } from 'node:fs';
 
 const REPO = process.env.GITHUB_REPOSITORY ?? 'nakshakarapp-hue/nakshakar';
 const TOKEN = process.env.GITHUB_TOKEN ?? process.env.GH_TOKEN;
-// Hosted sites are limited to 1 GB, and one version is about 155 MB.
 const KEEP_VERSIONS = 5;
 const OUT = '_site';
 
@@ -27,19 +25,11 @@ const releases = (await response.json()).filter((r) => !r.draft && !r.prerelease
 const PLATFORM = { '.exe': 'windows', '.apk': 'android' };
 const versions = [];
 for (const release of releases) {
-  const folder = `downloads/${release.tag_name}`;
-  mkdirSync(`${OUT}/${folder}`, { recursive: true });
   const files = {};
   for (const asset of release.assets) {
     const platform = PLATFORM[asset.name.slice(asset.name.lastIndexOf('.'))];
     if (!platform) continue;
-    const file = await fetch(asset.browser_download_url, { redirect: 'follow' });
-    if (!file.ok) throw new Error(`Could not download ${asset.name}: ${file.status}`);
-    const path = `${folder}/${asset.name}`;
-    await pipeline(Readable.fromWeb(file.body), createWriteStream(`${OUT}/${path}`));
-    const size = statSync(`${OUT}/${path}`).size;
-    if (size !== asset.size) throw new Error(`${asset.name} is ${size} bytes, expected ${asset.size}`);
-    files[platform] = { path, name: asset.name, size };
+    files[platform] = { url: asset.browser_download_url, name: asset.name, size: asset.size };
   }
   versions.push({ version: release.tag_name.replace(/^v/, ''), date: release.published_at, files });
   console.log(`${release.tag_name}: ${Object.keys(files).join(', ')}`);
@@ -57,7 +47,7 @@ if (latest) {
     .filter((line) => /^\s*[-*] /.test(line))
     .map((line) => line.replace(/^\s*[-*] /, '').trim())
     .slice(0, 12);
-  const link = (f) => (f ? { url: `${SITE}${f.path}`, size: f.size } : undefined);
+  const link = (f) => (f ? { url: f.url, size: f.size } : undefined);
   writeFileSync(
     `${OUT}/version.json`,
     JSON.stringify(

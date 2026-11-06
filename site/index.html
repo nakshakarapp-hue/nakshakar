@@ -1061,7 +1061,7 @@
       const longDate = (iso) => new Date(iso).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' });
       const fileLink = (file, label, className) => {
         const a = document.createElement('a');
-        a.href = `./${file.path}`;
+        a.href = file.url;
         a.download = file.name;
         a.className = className;
         a.innerHTML = label;

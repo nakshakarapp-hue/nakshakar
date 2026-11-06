@@ -28,7 +28,8 @@ import java.io.File;
 @CapacitorPlugin(name = "AppUpdater")
 public class AppUpdaterPlugin extends Plugin {
 
-    /** The only place an update is downloaded from. */
+    /** The only places an update is downloaded from: the releases of the public repository, or the site. */
+    private static final String RELEASES = "https://github.com/nakshakarapp-hue/nakshakar/releases/download/";
     private static final String SITE = "https://nakshakarapp-hue.github.io/nakshakar/";
     private static final String FILE_NAME = "nakshakar-update.apk";
 
@@ -59,7 +60,7 @@ public class AppUpdaterPlugin extends Plugin {
             return;
         }
         String url = call.getString("url");
-        if (url == null || !url.startsWith(SITE) || !url.endsWith(".apk")) {
+        if (url == null || !(url.startsWith(RELEASES) || url.startsWith(SITE)) || !url.endsWith(".apk")) {
             call.reject("Updates only come from the Nakshakar website.");
             return;
         }

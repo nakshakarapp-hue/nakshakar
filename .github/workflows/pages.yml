@@ -1,0 +1,51 @@
+name: Website
+
+# Runs after each push to main, and by hand after a release is published (Pages only accepts deploys
+# from main, so a release cannot deploy by itself).
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    # The website lives in the public repository only; a private copy has no free Pages site.
+    if: github.repository == 'nakshakarapp-hue/nakshakar'
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install
+        run: npm ci
+        env:
+          ELECTRON_SKIP_BINARY_DOWNLOAD: 1
+          PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: 1
+      - name: Check
+        run: npm run typecheck && npm run test
+      - name: Build the app
+        run: npm run build
+      - name: Put the app and installers inside the website
+        run: node scripts/build-site.mjs
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+      - id: deployment
+        uses: actions/deploy-pages@v4

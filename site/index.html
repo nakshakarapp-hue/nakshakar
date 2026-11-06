@@ -1,0 +1,1126 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#0d2238" />
+    <title>Nakshakar: house planning with real measurements</title>
+    <meta
+      name="description"
+      content="Plan a house with real measurements, view it in 3D, check Vastu, print dimensioned plans and estimate cost as a range. Works offline with no account."
+    />
+    <link rel="icon" href="./app/icon.svg" />
+    <style>
+      :root {
+        --ink: #16202c;
+        --muted: #5c6673;
+        --line: #dfe3e8;
+        --bg: #f4f5f7;
+        --accent: #1b4f8a;
+        --accent-soft: #e7eef7;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      html {
+        scroll-behavior: smooth;
+        scroll-padding-top: 76px;
+      }
+      body {
+        margin: 0;
+        font-family: 'Segoe UI', system-ui, -apple-system, Roboto, sans-serif;
+        color: var(--ink);
+        background: #ffffff;
+        line-height: 1.55;
+        -webkit-font-smoothing: antialiased;
+      }
+      a {
+        color: inherit;
+      }
+      .wrap {
+        max-width: 1160px;
+        margin: 0 auto;
+        padding: 0 24px;
+      }
+      nav {
+        position: sticky;
+        top: 0;
+        background: rgba(255, 255, 255, 0.96);
+        border-bottom: 1px solid var(--line);
+        z-index: 10;
+      }
+      nav .wrap {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        height: 60px;
+      }
+      .brand {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        font-weight: 600;
+        text-decoration: none;
+      }
+      .brand img {
+        width: 28px;
+        height: 28px;
+        border-radius: 6px;
+      }
+      nav .links {
+        display: flex;
+        align-items: center;
+        gap: 22px;
+        font-size: 14px;
+      }
+      nav .links a:not(.btn) {
+        color: var(--muted);
+        text-decoration: none;
+      }
+      nav .links a:not(.btn):hover {
+        color: var(--ink);
+      }
+      nav .btn {
+        min-height: 36px;
+        padding: 6px 14px;
+        font-size: 14px;
+      }
+      .hero {
+        display: grid;
+        grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+        gap: 48px;
+        align-items: center;
+        padding-top: 56px;
+        padding-bottom: 56px;
+      }
+      h1 {
+        font-size: clamp(32px, 4.2vw, 46px);
+        line-height: 1.12;
+        letter-spacing: -0.025em;
+        font-weight: 650;
+        margin: 0 0 16px;
+      }
+      .lead {
+        font-size: 18px;
+        color: var(--muted);
+        margin: 0 0 28px;
+      }
+      .cta {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        min-height: 46px;
+        padding: 10px 20px;
+        border-radius: 8px;
+        border: 1px solid transparent;
+        font: inherit;
+        font-size: 15px;
+        font-weight: 600;
+        text-decoration: none;
+        cursor: pointer;
+      }
+      .btn:focus-visible {
+        outline: 2px solid var(--accent);
+        outline-offset: 2px;
+      }
+      .solid {
+        background: var(--accent);
+        color: #ffffff;
+      }
+      .solid:hover {
+        background: #163f6e;
+      }
+      .plain {
+        background: #ffffff;
+        border-color: var(--line);
+        color: var(--ink);
+      }
+      .plain:hover {
+        background: var(--bg);
+      }
+      .note {
+        margin: 16px 0 0;
+        color: var(--muted);
+        font-size: 14px;
+      }
+      .frame {
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 16px 48px rgba(16, 24, 40, 0.12);
+        background: var(--bg);
+      }
+      .frame img {
+        display: block;
+        width: 100%;
+        height: auto;
+      }
+      section.band {
+        border-top: 1px solid var(--line);
+        padding: 56px 0;
+      }
+      section.band.tint {
+        background: var(--bg);
+      }
+      h2 {
+        font-size: 26px;
+        letter-spacing: -0.015em;
+        font-weight: 600;
+        margin: 0 0 8px;
+      }
+      .sub {
+        color: var(--muted);
+        margin: 0 0 28px;
+        max-width: 660px;
+      }
+      .features {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 28px 36px;
+        margin: 0;
+        padding: 0;
+        list-style: none;
+      }
+      .features h3 {
+        font-size: 15px;
+        font-weight: 600;
+        margin: 0 0 4px;
+      }
+      .features p {
+        margin: 0;
+        color: var(--muted);
+        font-size: 14.5px;
+      }
+
+      /* Gallery */
+      .tabs {
+        display: flex;
+        gap: 0;
+        border-bottom: 1px solid var(--line);
+        margin-bottom: 24px;
+        overflow-x: auto;
+      }
+      .tab {
+        border: 0;
+        border-bottom: 2px solid transparent;
+        background: none;
+        color: var(--muted);
+        font: inherit;
+        font-size: 14px;
+        font-weight: 500;
+        padding: 10px 16px;
+        margin-bottom: -1px;
+        cursor: pointer;
+        white-space: nowrap;
+      }
+      .tab:hover {
+        color: var(--ink);
+      }
+      .tab[aria-selected='true'] {
+        color: var(--accent);
+        border-color: var(--accent);
+      }
+      .gallery {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 20px;
+      }
+      .gallery.tall {
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+      }
+      .shot {
+        display: block;
+        align-self: start;
+        width: 100%;
+        padding: 0;
+        border: 0;
+        background: none;
+        font: inherit;
+        color: inherit;
+        text-align: left;
+        cursor: zoom-in;
+      }
+      .shot .frame {
+        box-shadow: none;
+        aspect-ratio: 16 / 10;
+        transition: border-color 0.12s;
+      }
+      .tall .shot .frame {
+        aspect-ratio: 9 / 19;
+      }
+      .shot:hover .frame,
+      .shot:focus-visible .frame {
+        border-color: var(--accent);
+      }
+      .shot img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: top center;
+      }
+      .shot strong {
+        display: block;
+        font-size: 14px;
+        font-weight: 600;
+        margin-top: 10px;
+      }
+      .shot span {
+        display: block;
+        font-size: 13.5px;
+        color: var(--muted);
+      }
+      #viewer {
+        border: 0;
+        padding: 0;
+        background: none;
+        max-width: 94vw;
+        max-height: 94vh;
+        overflow: visible;
+      }
+      #viewer::backdrop {
+        background: rgba(12, 18, 28, 0.86);
+      }
+      #viewer img {
+        display: block;
+        max-width: 94vw;
+        max-height: 82vh;
+        border-radius: 6px;
+        margin: 0 auto;
+      }
+      #viewer .bar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        color: #ffffff;
+        padding-top: 10px;
+        font-size: 14px;
+      }
+      #viewer .bar button {
+        min-height: 38px;
+        padding: 6px 14px;
+        background: rgba(255, 255, 255, 0.14);
+        color: #ffffff;
+        font-weight: 500;
+        font-size: 14px;
+      }
+      #viewer .bar div {
+        display: flex;
+        gap: 6px;
+      }
+
+      /* Downloads */
+      .platforms {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 20px;
+      }
+      .platform {
+        display: flex;
+        flex-direction: column;
+        background: #ffffff;
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        padding: 20px;
+        min-width: 0;
+      }
+      .platform.mine {
+        border-color: var(--accent);
+        box-shadow: 0 0 0 1px var(--accent);
+      }
+      .platform-head {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 4px;
+      }
+      .platform-head svg {
+        color: var(--muted);
+        flex: 0 0 auto;
+      }
+      .platform h3 {
+        font-size: 18px;
+        font-weight: 600;
+        margin: 0;
+      }
+      .tag {
+        margin-left: auto;
+        font-size: 12px;
+        color: var(--accent);
+        background: var(--accent-soft);
+        padding: 2px 8px;
+        border-radius: 4px;
+        white-space: nowrap;
+      }
+      .platform > p {
+        margin: 0 0 14px;
+        color: var(--muted);
+        font-size: 14px;
+      }
+      .platform .main {
+        width: 100%;
+      }
+      .platform .main small {
+        font-weight: 400;
+        opacity: 0.85;
+        font-size: 13px;
+      }
+      .help {
+        font-size: 13.5px;
+        color: var(--muted);
+        margin: 12px 0 0;
+        padding: 0 0 0 18px;
+      }
+      .help li {
+        margin-bottom: 3px;
+      }
+      .versions-title {
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--muted);
+        margin: 16px 0 6px;
+      }
+      .versions {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        max-height: 168px;
+        overflow-y: auto;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+      }
+      .versions li {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 8px 10px;
+        border-top: 1px solid var(--line);
+        font-size: 13.5px;
+      }
+      .versions li:first-child {
+        border-top: 0;
+      }
+      .versions b {
+        font-weight: 600;
+      }
+      .versions .meta {
+        color: var(--muted);
+        font-size: 12.5px;
+        flex: 1 1 auto;
+        min-width: 0;
+      }
+      .versions a {
+        color: var(--accent);
+        font-weight: 600;
+        text-decoration: none;
+        white-space: nowrap;
+      }
+      .versions a:hover {
+        text-decoration: underline;
+      }
+      .loading {
+        color: var(--muted);
+        font-size: 14px;
+      }
+      footer {
+        border-top: 1px solid var(--line);
+        color: var(--muted);
+        padding: 24px 0 36px;
+        font-size: 14px;
+      }
+      @media (max-width: 900px) {
+        .hero,
+        .platforms {
+          grid-template-columns: 1fr;
+        }
+        .hero {
+          padding-top: 36px;
+          padding-bottom: 36px;
+          gap: 28px;
+        }
+        .features,
+        .gallery {
+          grid-template-columns: 1fr;
+          gap: 20px;
+        }
+        .gallery.tall {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+        nav .links a:not(.btn) {
+          display: none;
+        }
+      }
+      /* ---------- Version 2 landing ---------- */
+      .hero2 {
+        color: #fff;
+        background:
+          radial-gradient(90% 120% at 100% 0%, rgba(90, 150, 230, 0.35), transparent 60%),
+          radial-gradient(70% 90% at 0% 100%, rgba(240, 166, 58, 0.18), transparent 60%),
+          linear-gradient(140deg, #0d2238 0%, #143a62 55%, #1b4f84 100%);
+        padding: 64px 0 72px;
+        overflow: hidden;
+      }
+      .hero2-grid {
+        display: grid;
+        grid-template-columns: 1fr 1.1fr;
+        gap: 48px;
+        align-items: center;
+      }
+      .kicker {
+        margin: 0 0 12px;
+        font-size: 13px;
+        font-weight: 700;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: #9cc3f0;
+      }
+      .hero2 h1 {
+        margin: 0;
+        font-size: clamp(34px, 4.6vw, 56px);
+        line-height: 1.08;
+        font-weight: 800;
+        letter-spacing: -0.01em;
+      }
+      .hero2 h1 span {
+        color: #f5b551;
+      }
+      .hero2 .lead {
+        margin: 20px 0 0;
+        font-size: 18px;
+        color: #d4e3f5;
+        max-width: 540px;
+      }
+      .hero2 .cta {
+        margin-top: 28px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+      }
+      .btn.gold {
+        background: #f0a63a;
+        border-color: #f0a63a;
+        color: #1b1405;
+        font-weight: 700;
+        padding: 14px 22px;
+        border-radius: 10px;
+        text-decoration: none;
+        box-shadow: 0 8px 24px rgba(240, 166, 58, 0.35);
+      }
+      .btn.gold:hover {
+        background: #f5b551;
+      }
+      .btn.ghost-light {
+        color: #fff;
+        border: 1px solid rgba(255, 255, 255, 0.4);
+        padding: 14px 22px;
+        border-radius: 10px;
+        text-decoration: none;
+        font-weight: 600;
+      }
+      .btn.ghost-light:hover {
+        background: rgba(255, 255, 255, 0.1);
+      }
+      .chips {
+        list-style: none;
+        margin: 26px 0 0;
+        padding: 0;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+      .chips li {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 7px 12px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.08);
+        border: 1px solid rgba(255, 255, 255, 0.16);
+        font-size: 14px;
+        color: #e1ecf8;
+      }
+      .chips svg {
+        width: 16px;
+        height: 16px;
+        color: #9cc3f0;
+      }
+      .hero2-art {
+        position: relative;
+        padding-bottom: 36px;
+      }
+      .hero2-art .frame {
+        border-radius: 14px;
+        overflow: hidden;
+        box-shadow: 0 30px 60px rgba(0, 0, 0, 0.4);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        background: #0d2238;
+      }
+      .hero2-art .frame img {
+        display: block;
+        width: 100%;
+        height: auto;
+      }
+      .hero2-art .phone {
+        position: absolute;
+        right: -10px;
+        bottom: -10px;
+        width: 26%;
+        border-radius: 22px;
+        border: 5px solid #0b1b2c;
+      }
+      .stats {
+        background: #fff;
+        border-bottom: 1px solid var(--line);
+      }
+      .stats-row {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 16px;
+        padding: 28px 20px;
+        text-align: center;
+      }
+      .stats strong {
+        display: block;
+        font-size: 34px;
+        font-weight: 800;
+        color: var(--accent);
+        line-height: 1.1;
+      }
+      .stats span {
+        color: var(--muted);
+        font-size: 14px;
+      }
+      .steps3 {
+        list-style: none;
+        margin: 32px 0 0;
+        padding: 0;
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 20px;
+      }
+      .steps3 li {
+        background: #fff;
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        padding: 24px;
+        box-shadow: 0 6px 20px rgba(16, 42, 70, 0.06);
+      }
+      .step-n {
+        display: inline-grid;
+        place-items: center;
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background: var(--accent);
+        color: #fff;
+        font-weight: 800;
+      }
+      .steps3 h3 {
+        margin: 14px 0 6px;
+        font-size: 19px;
+      }
+      .steps3 p {
+        margin: 0;
+        color: var(--muted);
+      }
+      .features.cards li {
+        background: #fff;
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        padding: 22px;
+        transition:
+          transform 0.15s ease,
+          box-shadow 0.15s ease;
+      }
+      .features.cards li:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 12px 28px rgba(16, 42, 70, 0.1);
+      }
+      .features.cards svg {
+        color: var(--accent);
+        background: var(--accent-soft);
+        border-radius: 10px;
+        padding: 8px;
+        width: 40px;
+        height: 40px;
+      }
+      .showcase .show-row {
+        display: grid;
+        grid-template-columns: 1.3fr 1fr;
+        gap: 48px;
+        align-items: center;
+        margin-bottom: 64px;
+      }
+      .showcase .show-row.flip > :first-child {
+        order: 2;
+      }
+      .showcase .frame {
+        border-radius: 14px;
+        overflow: hidden;
+        box-shadow: 0 20px 50px rgba(16, 42, 70, 0.18);
+        border: 1px solid var(--line);
+      }
+      .showcase .frame img {
+        display: block;
+        width: 100%;
+        height: auto;
+      }
+      .showcase h2 {
+        font-size: clamp(24px, 2.6vw, 32px);
+        line-height: 1.2;
+      }
+      .final-cta {
+        color: #fff;
+        text-align: center;
+        padding: 64px 0;
+        background: linear-gradient(140deg, #0d2238, #1b4f84);
+      }
+      .final-cta h2 {
+        font-size: clamp(26px, 3vw, 38px);
+        margin: 0 0 8px;
+      }
+      .final-cta p {
+        color: #d4e3f5;
+        margin: 0;
+      }
+      .cta.center {
+        justify-content: center;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-top: 24px;
+      }
+      @media (max-width: 900px) {
+        .hero2 {
+          padding: 40px 0 48px;
+        }
+        .hero2-grid,
+        .showcase .show-row {
+          grid-template-columns: 1fr;
+          gap: 28px;
+        }
+        .showcase .show-row.flip > :first-child {
+          order: 0;
+        }
+        .stats-row {
+          grid-template-columns: repeat(2, 1fr);
+        }
+        .steps3 {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <nav>
+      <div class="wrap">
+        <a class="brand" href="#top"><img src="./app/icon-192.png" alt="" />Nakshakar</a>
+        <div class="links">
+          <a href="#features">Features</a>
+          <a href="#screens">Screens</a>
+          <a href="#downloads">Downloads</a>
+          <a class="btn solid" href="./app/" target="_blank" rel="noopener">Open in browser</a>
+        </div>
+      </div>
+    </nav>
+
+    <main id="top">
+      <header class="hero2">
+        <div class="wrap hero2-grid">
+          <div class="hero2-copy">
+            <p class="kicker">House design for India</p>
+            <h1>Plan your house.<br />Walk through it.<br /><span>Know what it costs.</span></h1>
+            <p class="lead">
+              Lay out rooms to size in feet, metres or gaj, see the house in 3D, walk inside, check Vastu and get the cost
+              as a clear range. Free, offline, no account.
+            </p>
+            <div class="cta">
+              <a class="btn gold" id="open-site" href="./app/" target="_blank" rel="noopener">Open in your browser</a>
+              <a class="btn ghost-light" id="install-app" href="#downloads">Download the app</a>
+            </div>
+            <ul class="chips">
+              <li><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></svg> Works offline</li>
+              <li><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg> No account, no ads</li>
+              <li><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h8M8 3v2M6 5c0 4 3 7 6 8M10 5c0 4-3 7-6 8M13 21l4-9 4 9M14.5 18h5"/></svg> English · हिंदी · తెలుగు</li>
+            </ul>
+          </div>
+          <div class="hero2-art">
+            <div class="frame big"><img src="./shots/3d-outside.webp" alt="The sample house in 3D" width="1400" height="787" /></div>
+            <div class="frame phone"><img src="./shots/phone-plan.webp" alt="The plan on a phone" width="720" height="1600" /></div>
+          </div>
+        </div>
+      </header>
+
+      <section class="stats">
+        <div class="wrap stats-row">
+          <div><strong>124</strong><span>furniture and fittings</span></div>
+          <div><strong>35</strong><span>door and window types</span></div>
+          <div><strong>8</strong><span>stair types, any angle</span></div>
+          <div><strong>3</strong><span>languages in full</span></div>
+        </div>
+      </section>
+
+      <section class="band" id="how">
+        <div class="wrap">
+          <h2>From an idea to a house in three steps</h2>
+          <p class="sub">A guide shows you each button the first time, so anyone can start.</p>
+          <ol class="steps3">
+            <li>
+              <span class="step-n">1</span>
+              <h3>Add rooms</h3>
+              <p>Pick a room and a size. It joins on with walls, a door, a window and furniture.</p>
+            </li>
+            <li>
+              <span class="step-n">2</span>
+              <h3>Walk through it</h3>
+              <p>Turn it in 3D, then walk up to the front door, open it and climb the stairs.</p>
+            </li>
+            <li>
+              <span class="step-n">3</span>
+              <h3>Know the cost</h3>
+              <p>See cost, materials and days as minimum, most likely and maximum, with your own prices.</p>
+            </li>
+          </ol>
+        </div>
+      </section>
+
+      <section class="band tint" id="features">
+        <div class="wrap">
+          <h2>Everything a house plan needs</h2>
+          <p class="sub">For house owners, mestris, builders, contractors and engineers.</p>
+          <ul class="features cards">
+            <li><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 12h9v9M12 3v9"/></svg><h3>Rooms to size</h3><p>Room after room with shared walls, and a preview of where the next one goes.</p></li>
+            <li><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 17 17 3l4 4L7 21z"/><path d="m7 13 2 2M10 10l2 2M13 7l2 2"/></svg><h3>Real units</h3><p>Feet and inches, metres or gaj. Trace your plot with setbacks, or type every wall.</p></li>
+            <li><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 3 9 5-9 5-9-5z"/><path d="m3 13 9 5 9-5"/></svg><h3>Floors</h3><p>Storeys, a basement or a terrace, each with its own undo, in any order.</p></li>
+            <li><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="13" cy="4" r="2"/><path d="m9 21 2-6 3 3v3M7 12l3-4 4 1 3 3M10 8l-1 5"/></svg><h3>3D walkthrough</h3><p>Start at the front door, open doors and windows, and go from room to room.</p></li>
+            <li><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 11h-14a2 2 0 0 1 0-4h14a2 2 0 0 1 0 4zM12 11v5M10 16h4v5h-4z"/></svg><h3>Finishes</h3><p>Doors, windows, furniture and plants by picture. Paint walls, floors and roofs.</p></li>
+            <li><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m15.5 8.5-2 5-5 2 2-5z"/></svg><h3>Vastu check</h3><p>A score with reasons you can read, and rules you can leave out.</p></li>
+            <li><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 4h12M6 9h12M14 4c3 0 4 2 4 5s-2 5-6 5H6l8 7"/></svg><h3>Estimates as ranges</h3><p>Cement, steel, bricks and labour, with every assumption listed.</p></li>
+            <li><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9V3h12v6M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="7"/></svg><h3>Printed plans</h3><p>Vector PDF plans with dimensions, north arrow and scale.</p></li>
+            <li><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.6 13.5 6.8 4M15.4 6.5l-6.8 4"/></svg><h3>Share a house</h3><p>Send one file on WhatsApp. They can look through it or keep a copy.</p></li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="band showcase">
+        <div class="wrap show-row">
+          <div class="frame"><img src="./shots/3d-walk-inside.webp" alt="Walking inside the house" loading="lazy" width="1400" height="787" /></div>
+          <div>
+            <h2>Stand inside your house before it is built</h2>
+            <p class="sub">Walk with W A S D or the on-screen stick. Doors and windows open, stairs climb, and every room is furnished from the plan.</p>
+          </div>
+        </div>
+        <div class="wrap show-row flip">
+          <div class="frame"><img src="./shots/estimate.webp" alt="The cost estimate as a range" loading="lazy" width="1400" height="787" /></div>
+          <div>
+            <h2>A cost you can plan with</h2>
+            <p class="sub">Minimum, most likely and maximum, stage by stage. Type what you really pay locally and it updates at once.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="band" id="screens">
+        <div class="wrap">
+          <h2>See every part of it</h2>
+          <p class="sub">Real screens from the app, using its sample two-storey house. Select any picture to see it full size.</p>
+          <div class="tabs" role="tablist" id="gallery-tabs"></div>
+          <div class="gallery" id="gallery"></div>
+        </div>
+      </section>
+
+      <section class="band tint" id="downloads">
+        <div class="wrap">
+          <h2>Downloads</h2>
+          <p class="sub">The same app on every device. Choose yours, or use it straight away in a browser with Open site.</p>
+          <div class="platforms">
+            <article class="platform" id="windows" data-platform="windows">
+              <div class="platform-head">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="3" width="20" height="14" rx="2" /><path d="M8 21h8M12 17v4" /></svg>
+                <h3>Windows</h3>
+              </div>
+              <p>Windows 10 and 11, 64-bit. Runs in its own window, with no internet needed.</p>
+              <div class="files"><p class="loading">Loading versions…</p></div>
+              <ol class="help">
+                <li>Download and open the file.</li>
+                <li>If Windows shows an "unknown publisher" warning, choose More info, then Run anyway. The app is not code-signed.</li>
+              </ol>
+            </article>
+
+            <article class="platform" id="android" data-platform="android">
+              <div class="platform-head">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="6" y="2" width="12" height="20" rx="2" /><path d="M11 18h2" /></svg>
+                <h3>Android</h3>
+              </div>
+              <p>Phones and tablets. It asks for no internet permission at all.</p>
+              <div class="files"><p class="loading">Loading versions…</p></div>
+              <ol class="help">
+                <li>Download and open the file.</li>
+                <li>If asked, allow installs from your browser, then tap Install.</li>
+              </ol>
+            </article>
+
+            <article class="platform" id="ios">
+              <div class="platform-head">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="2" width="16" height="20" rx="2" /><path d="M10 18h4" /></svg>
+                <h3>iPhone and iPad</h3>
+              </div>
+              <p>Add it to your Home Screen. It opens like an app and works offline after the first visit.</p>
+              <a class="btn solid main" href="./app/" target="_blank" rel="noopener">Open in Safari</a>
+              <ol class="help">
+                <li>Open the site in Safari.</li>
+                <li>Tap Share.</li>
+                <li>Tap Add to Home Screen, then Add.</li>
+              </ol>
+              <p class="note">There is no App Store version yet, so there is no file to download.</p>
+            </article>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <dialog id="viewer" aria-label="Screenshot">
+      <img alt="" />
+      <div class="bar">
+        <span id="viewer-caption"></span>
+        <div>
+          <button class="btn" id="viewer-prev" type="button">Previous</button>
+          <button class="btn" id="viewer-next" type="button">Next</button>
+          <button class="btn" id="viewer-close" type="button">Close</button>
+        </div>
+      </div>
+    </dialog>
+
+    <section class="final-cta">
+      <div class="wrap">
+        <h2>Start your house today</h2>
+        <p>Free, in your browser or as an app. Your plans never leave your device.</p>
+        <div class="cta center">
+          <a class="btn gold" href="./app/" target="_blank" rel="noopener">Open in your browser</a>
+          <a class="btn ghost-light" href="#downloads">Download the app</a>
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      <div class="wrap">
+        Nakshakar is a planning tool, not a structural design. A licensed engineer must design the structure.
+        <a href="privacy.html">Privacy policy</a>
+      </div>
+    </footer>
+
+    <script>
+      // ---------- Screens ----------
+      const GALLERY = [
+        {
+          name: 'Planning',
+          shots: [
+            ['plan', 'The plan', 'Walls, rooms, sizes and a compass, with tools on the left.'],
+            ['rooms-panel', 'Add rooms', 'Pick a room and a size. A dashed outline shows where it goes.'],
+            ['size-popover', 'Change any size', 'Select an item and start typing, or tap the size beside it.'],
+            ['stair-selected', 'Turn a stair', 'Four directions, left or right turns, or drag the round handle.'],
+            ['slab-selected', 'Slabs', 'Drag two corners, then type the width and length.'],
+            ['room-selected', 'Change a room', 'Type its size, name it, and choose its finishes.'],
+            ['draw-walls', 'Draw a wall', 'Two clicks, or type the length, and the tool finishes itself.'],
+            ['floors', 'Floors', 'Move any floor up or down, or copy it.'],
+            ['floors-add', 'Add a floor', 'Repeat the layout, copy everything, or start empty.'],
+            ['plot', 'Trace your plot', 'Enter the sides and setbacks to find the buildable area.'],
+            ['perimeter', 'Perimeter table', 'Type each side and turn; it tells you if the loop closes.'],
+            ['shortcuts', 'Keyboard shortcuts', 'Numbers, Enter, Delete, arrows and a letter for each tool.'],
+          ],
+        },
+        {
+          name: 'Doors and finishes',
+          shots: [
+            ['library-recent', 'Recent', 'The library opens on what you used last.'],
+            ['library-doors', 'Doors', 'Every type shown by how it looks, with its size.'],
+            ['library-windows', 'Windows', 'Sliding, casement, bay, louvred and more.'],
+            ['library-furniture', 'Furniture', 'By room: living, bedroom, kitchen, bathroom and others.'],
+            ['library-plants', 'Plants and trees', 'For the garden, the balcony and indoors.'],
+            ['library-stairs', 'Stairs', 'Straight, L, U and spiral, in several finishes.'],
+            ['paint-plan', 'Paint on the plan', 'Choose a colour and tap a room, wall or floor.'],
+            ['3d-paint', 'Paint in 3D', 'Tap any wall, floor, roof or item to paint it.'],
+          ],
+        },
+        {
+          name: '3D and walking',
+          shots: [
+            ['3d-outside', 'Overview', 'Turn the whole house, built directly from the plan.'],
+            ['3d-cutaway', 'Look inside', 'Show one floor at a time, with the rooms furnished.'],
+            ['3d-night', 'Night view', 'See the house after dark.'],
+            ['explore-start', 'Explore', 'Start at the front of the house and walk inside.'],
+            ['explore-walk', 'Walk or run', 'W A S D or the on-screen stick; drag to look around.'],
+            ['3d-door-open', 'Open the doors', 'Walk up to a door or window and open it.'],
+            ['3d-walk-inside', 'Walk through', 'Go room to room and up the stairs.'],
+            ['3d-vr', 'Headset view', 'A split view for a simple phone headset.'],
+          ],
+        },
+        {
+          name: 'Reports and print',
+          shots: [
+            ['estimate', 'Estimate', 'Cost as minimum, most likely and maximum.'],
+            ['estimate-materials', 'Materials', 'Cement, steel, bricks, sand and aggregate as ranges.'],
+            ['estimate-schedule', 'Schedule and curing', 'Time for each stage, and how long to cure.'],
+            ['estimate-rates', 'Your local prices', 'Type what you actually pay; it recalculates at once.'],
+            ['vastu', 'Vastu check', 'A score with reasons; exclude any rule you like.'],
+            ['print', 'Print', 'Choose paper and contents, with a preview beside them.'],
+            ['pdf-plan', 'Printed plan', 'Dimensions, north arrow, scale and title block.'],
+            ['pdf-estimate', 'Printed estimate', 'Totals, stages, materials and schedule on paper.'],
+          ],
+        },
+        {
+          name: 'Languages and themes',
+          shots: [
+            ['telugu', 'Telugu', 'Menus, labels and reports in Telugu.'],
+            ['dark-hindi', 'Hindi, dark theme', 'Hindi in full, with a dark theme for night work.'],
+            ['shared-dialog', 'Open a shared house', 'A friend sends a file: look through it, or keep a copy.'],
+            ['shared-view', 'Just looking', 'Nothing is saved or changed until you choose to keep it.'],
+            ['converter', 'Unit converter', 'Including gaj, hath, cent, guntha, ankanam and bigha.'],
+            ['versions', 'Saved versions', 'A restore point every 10 minutes, plus any you name.'],
+            ['site', 'Site and roof', 'North, road side, plot, roof type and elevation style.'],
+          ],
+        },
+        {
+          name: 'On a phone',
+          tall: true,
+          shots: [
+            ['phone-plan', 'Plan', 'Five big buttons along the bottom.'],
+            ['phone-rooms', 'Add rooms', 'Room after room, with the plan above.'],
+            ['phone-library', 'Library', 'Pictures sized for your thumb.'],
+            ['phone-explore', 'Explore', 'One stick walks; a swipe turns the view.'],
+            ['phone-more', 'Menu', 'Everything else, in one place.'],
+          ],
+        },
+      ];
+
+      const tabs = document.getElementById('gallery-tabs');
+      const gallery = document.getElementById('gallery');
+      const viewer = document.getElementById('viewer');
+      const viewerImg = viewer.querySelector('img');
+      const caption = document.getElementById('viewer-caption');
+      let current = GALLERY[0];
+      let index = 0;
+
+      const showShot = (i) => {
+        index = (i + current.shots.length) % current.shots.length;
+        const [file, title, text] = current.shots[index];
+        viewerImg.src = `./shots/${file}.webp`;
+        viewerImg.alt = title;
+        caption.textContent = `${title}: ${text}`;
+      };
+
+      const showGroup = (group) => {
+        current = group;
+        gallery.className = group.tall ? 'gallery tall' : 'gallery';
+        gallery.replaceChildren(
+          ...group.shots.map(([file, title, text], i) => {
+            const button = document.createElement('button');
+            button.className = 'shot';
+            button.type = 'button';
+            button.innerHTML = `<div class="frame"><img src="./shots/${file}.webp" alt="${title}" loading="lazy" /></div><strong>${title}</strong><span>${text}</span>`;
+            button.addEventListener('click', () => {
+              showShot(i);
+              viewer.showModal();
+            });
+            return button;
+          }),
+        );
+        [...tabs.children].forEach((t) => t.setAttribute('aria-selected', String(t.dataset.name === group.name)));
+      };
+
+      GALLERY.forEach((group) => {
+        const tab = document.createElement('button');
+        tab.className = 'tab';
+        tab.type = 'button';
+        tab.role = 'tab';
+        tab.dataset.name = group.name;
+        tab.textContent = group.name;
+        tab.addEventListener('click', () => showGroup(group));
+        tabs.append(tab);
+      });
+      showGroup(GALLERY[0]);
+
+      document.getElementById('viewer-prev').addEventListener('click', () => showShot(index - 1));
+      document.getElementById('viewer-next').addEventListener('click', () => showShot(index + 1));
+      document.getElementById('viewer-close').addEventListener('click', () => viewer.close());
+      viewer.addEventListener('click', (e) => {
+        if (e.target === viewer) viewer.close();
+      });
+      viewer.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowLeft') showShot(index - 1);
+        if (e.key === 'ArrowRight') showShot(index + 1);
+      });
+
+      // ---------- Downloads ----------
+      const megabytes = (bytes) => `${Math.round(bytes / 1048576)} MB`;
+      const longDate = (iso) => new Date(iso).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' });
+      const fileLink = (file, label, className) => {
+        const a = document.createElement('a');
+        a.href = `./${file.path}`;
+        a.download = file.name;
+        a.className = className;
+        a.innerHTML = label;
+        return a;
+      };
+
+      fetch('./downloads/versions.json')
+        .then((r) => {
+          if (!r.ok) throw new Error(String(r.status));
+          return r.json();
+        })
+        .then((versions) => {
+          document.querySelectorAll('[data-platform]').forEach((card) => {
+            const platform = card.dataset.platform;
+            const list = versions.filter((v) => v.files[platform]);
+            const box = card.querySelector('.files');
+            box.replaceChildren();
+            if (!list.length) {
+              box.innerHTML = '<p class="loading">No download available yet.</p>';
+              return;
+            }
+            const latest = list[0];
+            const file = latest.files[platform];
+            box.append(fileLink(file, `Download <small>${latest.version} · ${megabytes(file.size)}</small>`, 'btn solid main'));
+            const title = document.createElement('div');
+            title.className = 'versions-title';
+            title.textContent = 'All versions';
+            const ul = document.createElement('ul');
+            ul.className = 'versions';
+            ul.dataset.testid = `versions-${platform}`;
+            for (const v of list) {
+              const li = document.createElement('li');
+              const f = v.files[platform];
+              li.innerHTML = `<b>${v.version}</b><span class="meta">${longDate(v.date)} · ${megabytes(f.size)}</span>`;
+              li.append(fileLink(f, 'Download', ''));
+              ul.append(li);
+            }
+            box.append(title, ul);
+          });
+        })
+        .catch(() => {
+          document.querySelectorAll('.files').forEach((b) => {
+            b.innerHTML = '<p class="loading">The list of versions could not be loaded. Please refresh the page.</p>';
+          });
+        });
+
+      // The card for this device is outlined and marked, so it is easy to spot.
+      const ua = navigator.userAgent;
+      const iOS = /iPhone|iPad|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+      const mine = iOS ? 'ios' : /Android/.test(ua) ? 'android' : /Windows/.test(ua) ? 'windows' : null;
+      if (mine) {
+        const card = document.getElementById(mine);
+        card.classList.add('mine');
+        const tag = document.createElement('span');
+        tag.className = 'tag';
+        tag.textContent = 'Your device';
+        card.querySelector('.platform-head').append(tag);
+        card.parentNode.prepend(card);
+      }
+    </script>
+  </body>
+</html>

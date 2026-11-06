@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Nakshakar</string>
+    <string name="title_activity_main">Nakshakar</string>
+    <string name="package_name">in.nakshakar.app</string>
+    <string name="custom_url_scheme">in.nakshakar.app</string>
+</resources>

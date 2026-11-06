@@ -1,0 +1,18 @@
+node_modules/
+dist/
+coverage/
+test-results/
+playwright-report/
+*.log
+# Signing material is never committed. Back it up separately.
+android/keystore.properties
+android/*.jks
+android/app/build/
+android/build/
+android/.gradle/
+android/local.properties
+release/
+site/app/
+docs/manual-images/
+build/.icon*
+_site/

@@ -6,7 +6,7 @@ GharNirman is now **Nakshakar**.
 
 - New name, on the website, the apps and the installers. Houses saved before keep working, and `.gharnirman` files still open
 - Your first house is taught step by step: the button to press lights up, and the guide waits for you to tap it. Replay it from the menu
-- An update notice with the new version's number, date and changes. On the website copy of the Android app, Update downloads and installs it; the Google Play copy goes to the Play Store; Windows opens the download page
+- An update notice with the new version's number, date and changes. On Android, Update downloads and installs it; on Windows it opens the download page
 - The website and downloads moved to their own home: nakshakarapp-hue.github.io/nakshakar
 - Built for Android 16, with a privacy policy page on the website
 - Walls keep joining corner after corner until you press Done
@@ -17,7 +17,7 @@ GharNirman is now **Nakshakar**.
 - The character is 5 ft 7 in, and walks with weight shift, heel strike and a natural idle
 - A new Home screen and a clearer Estimate, with the cost range and each stage as a bar
 - Fixed: a size dragged on the plan could jump back to the old number when a size box was open
-- Checked: undo on the first floor leaves the ground floor alone (fixed in 1.3.0), now tested with the exact steps reported
+- Fixed: each floor's Undo only takes back that floor. A second Undo no longer removes a floor you just added
 
 
 ## 1.3.0

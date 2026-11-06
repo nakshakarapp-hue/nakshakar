@@ -7,8 +7,8 @@
 # and a remote called "public".
 set -euo pipefail
 cd "$(dirname "$0")/.."
-MESSAGE="${1:?Give a message, for example: bash scripts/publish-public.sh 'Nakshakar 2.0.0'}"
-EMAIL="${PUBLIC_EMAIL:?Set PUBLIC_EMAIL to the account's no-reply address}"
+MESSAGE="${1:?Give a commit message, such as Nakshakar 2.0.0}"
+EMAIL="${PUBLIC_EMAIL:?Set PUBLIC_EMAIL to the no-reply address of the account}"
 
 git fetch public main 2>/dev/null || true
 TREE=$(git rev-parse 'HEAD^{tree}')

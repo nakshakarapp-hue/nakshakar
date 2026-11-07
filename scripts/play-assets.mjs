@@ -26,7 +26,7 @@ const p = await phone.newPage();
 const id = (t) => p.getByTestId(t);
 const shot = (n) => p.screenshot({ path: `${OUT}/phone-${n}.png` });
 await p.goto(URL);
-await p.evaluate(() => localStorage.setItem('gharnirman.prefs', JSON.stringify({ tourDone: true })));
+await p.evaluate(() => localStorage.setItem('CapacitorStorage.gharnirman.prefs', JSON.stringify({ tourDone: true })));
 await p.reload();
 await p.waitForTimeout(600);
 await shot('1-home');

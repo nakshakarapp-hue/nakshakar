@@ -43,6 +43,26 @@ export function collide(
   return p;
 }
 
+/**
+ * Moves from a point by a distance, stopping at walls and shut doors. The move is taken in short steps:
+ * on a slow device one frame can carry the body further than its own width, and a single check at the
+ * end would let it hop straight over a thin wall or door.
+ */
+export function moveWithCollisions(
+  from: Vec2,
+  delta: Vec2,
+  walk: WalkFloor | undefined,
+  open: ReadonlySet<string> | null = null,
+): Vec2 {
+  const length = Math.hypot(delta.x, delta.y);
+  const steps = Math.max(1, Math.ceil(length / (BODY_RADIUS_MM * 0.4)));
+  let p = from;
+  for (let i = 0; i < steps; i++) {
+    p = collide({ x: p.x + delta.x / steps, y: p.y + delta.y / steps }, walk, open);
+  }
+  return p;
+}
+
 /** Height of everything that can be stood on at a plan point, in metres. */
 export function standHeights(p: Vec2, walk: WalkFloor[], floors: Floor[]): number[] {
   const out: number[] = [];

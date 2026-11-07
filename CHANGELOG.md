@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.0.3
+
+- Walking: walls and shut doors always stop you, even on a slow phone. Before, a slow frame could carry you straight through the front door and out the back
+
 ## 2.0.2
 
 - Android: tapping Update again after closing the install prompt now starts a fresh download instead of waiting forever

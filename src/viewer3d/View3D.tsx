@@ -15,7 +15,7 @@ import { ItemThumb } from '../ui/ItemThumb';
 import { buildHouse, type BuiltHouse, type MovablePart, type SurfaceTag } from './builder';
 import { createCharacter, type Character } from './character';
 import { createMaterials } from './textures';
-import { collide, EYE_HEIGHT_M, floorAtHeight, nextFeetHeight, standHeights } from './walk';
+import { EYE_HEIGHT_M, floorAtHeight, nextFeetHeight, standHeights, moveWithCollisions } from './walk';
 import { createWorld, type World } from './world';
 
 type Mode = 'orbit' | 'walk' | 'vr' | 'look360';
@@ -422,8 +422,9 @@ export function View3D({ explore = false }: { explore?: boolean }) {
         const dirX = (fx * input.y + rx * input.x) * clamp;
         const dirZ = (fz * input.y + rz * input.x) * clamp;
         speed = (running ? RUN_SPEED : WALK_SPEED) * Math.min(1, len * 1.15);
-        const moved = collide(
-          { x: (w.x + dirX * speed * dt) * 1000, y: (w.z + dirZ * speed * dt) * 1000 },
+        const moved = moveWithCollisions(
+          { x: w.x * 1000, y: w.z * 1000 },
+          { x: dirX * speed * dt * 1000, y: dirZ * speed * dt * 1000 },
           here,
           openState.current,
         );

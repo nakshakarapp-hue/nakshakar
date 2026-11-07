@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { panBy, pinAt, toScreen, toWorld, type View } from '../editor2d/renderer';
 import { isNewer, parseRelease, RELEASES_URL } from '../app/update';
+import { moveWithCollisions } from '../viewer3d/walk';
 
 describe('a plan turned with two fingers', () => {
   const view: View = { cx: 5000, cy: 3000, zoom: 0.08, w: 800, h: 600, rot: 0.6 };
@@ -71,5 +72,22 @@ describe('the new version notice', () => {
     expect(r?.notes).toEqual(['One', 'Three']);
     expect(r?.android?.size).toBe(4_000_000);
     expect(r?.windows).toBeUndefined();
+  });
+});
+
+describe('walking on a slow device', () => {
+  it('a long step in one frame still stops at a wall', () => {
+    const walk = {
+      level: 0,
+      floorIndex: 0,
+      top: 3,
+      shape: [],
+      segments: [{ a: { x: 0, y: -5000 }, b: { x: 0, y: 5000 } }],
+      furniture: [],
+      doors: [],
+    } as unknown as Parameters<typeof moveWithCollisions>[2];
+    // 600 mm in one frame from 300 mm before the wall: one check at the end would land past it.
+    const end = moveWithCollisions({ x: -300, y: 0 }, { x: 600, y: 0 }, walk, new Set());
+    expect(end.x).toBeLessThan(0);
   });
 });

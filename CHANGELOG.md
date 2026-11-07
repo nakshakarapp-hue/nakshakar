@@ -1,5 +1,10 @@
 # Changelog
 
+## 2.0.1
+
+- The Home screen fits small phones: the heading, name box and buttons no longer run off the right edge
+- Downloads come straight from the release files, so the website loads faster
+
 ## 2.0.0
 
 GharNirman is now **Nakshakar**.

@@ -3076,7 +3076,10 @@ kbd {
     linear-gradient(135deg, #102a46 0%, #17406b 60%, #1d4f84 100%);
   box-shadow: 0 18px 40px rgba(16, 42, 70, 0.28);
   display: grid;
+  /* One column that never grows wider than the card, so nothing runs off a phone screen. */
+  grid-template-columns: minmax(0, 1fr);
   gap: 20px;
+  overflow-wrap: anywhere;
 }
 .hero-kicker {
   margin: 0 0 8px;
@@ -3102,6 +3105,10 @@ kbd {
 }
 .home-hero .home-create {
   max-width: 640px;
+  min-width: 0;
+}
+.home-hero .home-create .input {
+  width: 100%;
 }
 .home-hero .home-create .input {
   min-height: 48px;
@@ -3121,7 +3128,7 @@ kbd {
 }
 .hero-tiles {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(220px, 100%), 1fr));
   gap: 12px;
   max-width: 640px;
 }

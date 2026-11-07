@@ -1499,6 +1499,19 @@ test.describe('phone @phone', () => {
     await expect(page.getByTestId('size-chip')).toBeVisible();
   });
 
+  test('Home fits the phone screen, with nothing running off the side @phone', async ({ page }) => {
+    await page.goto('/');
+    await expect(page.getByTestId('create-project')).toBeVisible();
+    const overflow = await page.evaluate(() => {
+      const card = document.querySelector('.home-hero')!.getBoundingClientRect();
+      const past = [...document.querySelectorAll('.home-hero *')].filter(
+        (e) => e.getBoundingClientRect().right > card.right + 1,
+      ).length;
+      return { page: document.documentElement.scrollWidth - document.documentElement.clientWidth, past };
+    });
+    expect(overflow).toEqual({ page: 0, past: 0 });
+  });
+
   test('touch targets are at least 44 px @phone', async ({ page }) => {
     await page.goto('/');
     await page.getByTestId('open-sample').click();

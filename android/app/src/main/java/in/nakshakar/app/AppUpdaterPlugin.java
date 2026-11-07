@@ -6,6 +6,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Build;
@@ -31,7 +32,7 @@ public class AppUpdaterPlugin extends Plugin {
     /** The only places an update is downloaded from: the releases of the public repository, or the site. */
     private static final String RELEASES = "https://github.com/nakshakarapp-hue/nakshakar/releases/download/";
     private static final String SITE = "https://nakshakarapp-hue.github.io/nakshakar/";
-    private static final String FILE_NAME = "nakshakar-update.apk";
+    private static final String FILE_PREFIX = "nakshakar-update";
 
     @PluginMethod
     public void channel(PluginCall call) {
@@ -79,12 +80,15 @@ public class AppUpdaterPlugin extends Plugin {
             call.reject("No space to download the update.");
             return;
         }
-        File apk = new File(folder, FILE_NAME);
-        if (apk.exists() && !apk.delete()) {
-            call.reject("An old download could not be cleared.");
-            return;
-        }
         DownloadManager manager = (DownloadManager) context.getSystemService(Context.DOWNLOAD_SERVICE);
+        // Earlier attempts are cleared first, and each attempt gets its own file: Android will not start
+        // a download into a file that an earlier download still owns, so a second tap would hang.
+        SharedPreferences prefs = context.getSharedPreferences("updater", Context.MODE_PRIVATE);
+        long previous = prefs.getLong("download", -1);
+        if (previous != -1) manager.remove(previous);
+        File[] old = folder.listFiles((dir, name) -> name.startsWith(FILE_PREFIX));
+        if (old != null) for (File f : old) f.delete();
+        File apk = new File(folder, FILE_PREFIX + System.currentTimeMillis() + ".apk");
         DownloadManager.Request request = new DownloadManager.Request(Uri.parse(url))
             .setTitle("Nakshakar update")
             .setDescription("Downloading the new version")
@@ -92,6 +96,7 @@ public class AppUpdaterPlugin extends Plugin {
             .setDestinationUri(Uri.fromFile(apk))
             .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE);
         long id = manager.enqueue(request);
+        prefs.edit().putLong("download", id).apply();
 
         BroadcastReceiver done = new BroadcastReceiver() {
             @Override

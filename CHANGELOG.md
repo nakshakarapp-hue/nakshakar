@@ -1,5 +1,10 @@
 # Changelog
 
+## 2.0.2
+
+- Android: tapping Update again after closing the install prompt now starts a fresh download instead of waiting forever
+- The website counts visits and download clicks, with no cookies and no personal data. The app itself counts nothing
+
 ## 2.0.1
 
 - The Home screen fits small phones: the heading, name box and buttons no longer run off the right edge

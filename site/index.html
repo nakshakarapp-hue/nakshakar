@@ -1056,6 +1056,21 @@
         if (e.key === 'ArrowRight') showShot(index + 1);
       });
 
+      // ---------- Counting clicks ----------
+      // Each download and each Open in browser is counted as an event on the visit counter, so the
+      // dashboard shows how many people chose Windows, Android or the browser. Nothing about them is kept.
+      const platformOf = (name) => (/\.apk$/i.test(name) ? 'android' : /\.exe$/i.test(name) ? 'windows' : 'other');
+      const countClick = (path, title) => {
+        try {
+          window.goatcounter?.count?.({ path, title, event: true });
+        } catch {
+          // Counting never gets in the way of the click.
+        }
+      };
+      document.querySelectorAll('a[href="./app/"]').forEach((a) =>
+        a.addEventListener('click', () => countClick('open-in-browser', 'Open in browser')),
+      );
+
       // ---------- Downloads ----------
       const megabytes = (bytes) => `${Math.round(bytes / 1048576)} MB`;
       const longDate = (iso) => new Date(iso).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' });
@@ -1065,6 +1080,7 @@
         a.download = file.name;
         a.className = className;
         a.innerHTML = label;
+        a.addEventListener('click', () => countClick(`download-${platformOf(file.name)}`, `Download ${file.name}`));
         return a;
       };
 
@@ -1122,5 +1138,7 @@
         card.parentNode.prepend(card);
       }
     </script>
+    <!-- Visit counts for this website only (not the app): GoatCounter, with no cookies and no personal data. -->
+    <script data-goatcounter="https://nakshakar.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
   </body>
 </html>
